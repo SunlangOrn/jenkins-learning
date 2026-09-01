@@ -1,6 +1,6 @@
 pipeline {
 
-    any agent
+    agent any
 
     stages {
         stage('checkout'){
@@ -19,7 +19,7 @@ pipeline {
         stage('Archive'){
             steps{
                 echo 'Archive the JAR file ...'
-                archiveArtifacts artifacets: 'target/*.jar',
+                archiveArtifacts artifacts: 'target/*.jar',
                 allowEmptyArchive: false
             }
         }
