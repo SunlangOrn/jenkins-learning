@@ -11,7 +11,7 @@ pipeline {
 
         stage('Build and Test'){
             steps {
-                echo 'Running Maven Wrapper...'
+                echo 'Running Maven Wrapper....'
                 sh 'chmod +x mvnw && ./mvnw clean package'
             }
         }
