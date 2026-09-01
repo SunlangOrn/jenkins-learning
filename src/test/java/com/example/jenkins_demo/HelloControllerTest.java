@@ -8,6 +8,6 @@ public class HelloControllerTest {
     @Test
     public void testSayHello() {
         HelloController controller = new HelloController();
-        assertEquals("Hello Automated With Jenkins CI/CD!", controller.sayHello());
+        assertEquals("WRONG MESSAGE", controller.sayHello());
     }
 }
