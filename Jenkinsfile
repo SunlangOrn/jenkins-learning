@@ -56,6 +56,14 @@ pipeline {
                 echo 'Completed'
             }
         }
+
+        stage('Archive'){
+            steps{
+                echo 'Archive the JAR file ...'
+                archiveArtifacts artifacts: 'target/*.jar',
+                allowEmptyArchive: false
+            }
+        }
     }
 
     // define post-build action
