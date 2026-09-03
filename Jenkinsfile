@@ -5,7 +5,6 @@ pipeline {
     // define env variables
     environment {
         APP_NAME = 'jenkins-demo'
-        MAVEN_CMD = './mvnw'
     }
 
     stages {
@@ -15,10 +14,46 @@ pipeline {
             }
         }
 
-        stage('Build and Test'){
+        stage('Build'){
             steps {
                 echo 'Running Maven Wrapper....'
-                sh "chmod +x ${MAVEN_CMD} && ${MAVEN_CMD} clean package"
+                sh "chmod +x ./mvnw && ./mvnw clean package"
+            }
+        }
+
+        //use parallel stage for synoc
+        stage('test and analysis'){
+            parallel{
+                stage('Unit test'){
+                    steps {
+                        echo 'Running unit test'
+                        sh 'sleep 5' //mean take 5 min to test
+                        echo 'Unit tet passed'
+                    }
+                }
+                stage('analysis code'){
+                    steps {
+                        echo 'Runing code analysis'
+                        sh 'sleep 5'
+                        echo 'Code analysis passed'
+                    }
+                }
+
+            }
+        }
+
+        //Input prompt stage
+        stage('Approval for Production'){
+            steps {
+                input message: "Do you want to deploy ?", Ok: 'Deploy now'
+            }
+        }
+
+        stage('Deploy'){
+            steps {
+                echo 'Deploying to Prod'
+                sh 'sleep 3'
+                echo 'Completed'
             }
         }
 
