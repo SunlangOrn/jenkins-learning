@@ -45,7 +45,7 @@ pipeline {
         //Input prompt stage
         stage('Approval for Production'){
             steps {
-                input message: "Do you want to deploy ?", Ok: 'Deploy now'
+                input message: "Do you want to deploy ?", ok: 'Deploy now'
             }
         }
 
