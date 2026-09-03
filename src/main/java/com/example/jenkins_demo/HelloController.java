@@ -10,4 +10,9 @@ public class HelloController {
     public String sayHello(){
         return  "Hello Automated With Jenkins CI/CD!";
     }
+
+    @GetMapping("/version")
+    public String getVersion() {
+        return "Version 1.0";
+    }
 }
