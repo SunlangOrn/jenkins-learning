@@ -8,34 +8,35 @@ pipeline {
     }
 
     stages {
-        stage('checkout'){
-            steps {
-                echo 'checkout code for ${APP_NAME}...'
-            }
-        }
-
         stage('Build'){
             steps {
-                echo 'Running Maven Wrapper....'
-                sh "chmod +x ./mvnw && ./mvnw clean package"
+                echo "Compliling ${APP_NAME}"
+                sh "chmod +x ./mvnw && ./mvnw clean compile"
             }
         }
 
         //use parallel stage for synoc
-        stage('test and analysis'){
+        stage('test and package'){
             parallel{
-                stage('Unit test'){
+                stage('Test'){
                     steps {
                         echo 'Running unit test'
-                        sh 'sleep 5' //mean take 5 min to test
+                        sh './mvnw test'
                         echo 'Unit tet passed'
                     }
+                    // use 'post' to ensure the report is generate even if test is fail
+                    post {
+                        always {
+                            echo 'Capturing Test Result'
+                            junit 'target/surefire-reports/*.xml'
+                        }
+                    }
                 }
-                stage('analysis code'){
+                stage('Package'){
                     steps {
-                        echo 'Runing code analysis'
-                        sh 'sleep 5'
-                        echo 'Code analysis passed'
+                        echo 'Package app into JAR'
+                        // We skip tests here because we already ran them in the 'Test' stage
+                        sh './mvnw package -DskipTests'
                     }
                 }
 
