@@ -13,7 +13,7 @@ pipeline {
         stage('Biuld and Test'){
             steps{
                 echo "Compiling and Testing"
-                sh 'chmod +x mvnw && ./mvnw clean test'
+                sh 'chmod +x mvnw && ./mvnw clean package'
                 sh 'find target -type f'
             }
             post{
