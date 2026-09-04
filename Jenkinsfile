@@ -26,8 +26,8 @@ pipeline {
         stage('Dcoker Build'){
             steps{
                 echo "Docker build image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} .'
-                sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
+                sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
+                sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
             }
         }
 
@@ -36,8 +36,8 @@ pipeline {
                 echo "Push to docker hub"
                 //withDockerRegistry securely logs in and out
                 withDockerRegistry([credentailsId: DOCKER_CREDENTAILS_ID, url: '']){
-                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
