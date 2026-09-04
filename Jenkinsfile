@@ -31,7 +31,7 @@ pipeline {
         }
 
         stage('Docker push'){
-            step{
+            steps{
                 echo "Push to docker hub"
                 //withDockerRegistry securely logs in and out
                 withDockerRegistry([credentailId: DOCKER_CREDENTAIL_ID, url: '']){
@@ -40,10 +40,10 @@ pipeline {
                 }
             }
         }
-        post{
-            always {
-                echo "Pipeline finished"
-            }
+    }
+    post{
+        always {
+            echo "Pipeline finished"
         }
     }
 }
