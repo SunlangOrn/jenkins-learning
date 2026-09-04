@@ -14,6 +14,7 @@ pipeline {
             steps{
                 echo "Compiling and Testing"
                 sh 'chmod +x mvnw && ./mvnw clean test'
+                sh 'find target -type f'
             }
             post{
                 always {
