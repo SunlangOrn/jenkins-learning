@@ -5,7 +5,7 @@ pipeline {
     // define env variables
     environment {
         DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
-        DOCKER_CREDENTAILS_ID = 'docker-hub-credentails'
+        DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
     }
 
     stages {
@@ -35,7 +35,7 @@ pipeline {
             steps{
                 echo "Push to docker hub"
                 //withDockerRegistry securely logs in and out
-                withDockerRegistry([credentailsId: DOCKER_CREDENTAILS_ID, url: '']){
+                withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']){
                     sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
                     sh "docker push ${DOCKER_IMAGE}:latest"
                 }
