@@ -2,7 +2,7 @@ pipeline {
     agent any
 
     environment {
-        // REPLACE 'YOUR_DOCKERHUB_USERNAME' with your actual Docker Hub username!
+        // REPLACE with your actual Docker Hub username if different
         DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
     }
@@ -11,6 +11,7 @@ pipeline {
         stage('Build & Test') {
             steps {
                 echo "Compiling and Testing..."
+                // Single quotes are fine here because there are no variables
                 sh 'chmod +x mvnw && ./mvnw clean test'
             }
             post {
@@ -23,19 +24,17 @@ pipeline {
         stage('Docker Build') {
             steps {
                 echo "Building Docker Image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} .'
-                // Also tag it as 'latest' for convenience
-                sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
+                sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
+                sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
             }
         }
 
         stage('Docker Push') {
             steps {
                 echo "Pushing to Docker Hub..."
-                // withDockerRegistry securely logs in and out
                 withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
-                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
@@ -44,8 +43,6 @@ pipeline {
     post {
         always {
             echo "Pipeline finished."
-            // Optional: clean up local docker images to save disk space
-            // sh 'docker rmi ${DOCKER_IMAGE}:${env.BUILD_NUMBER} || true'
         }
     }
 }
