@@ -4,85 +4,46 @@ pipeline {
 
     // define env variables
     environment {
-        APP_NAME = 'jenkins-demo'
+        DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
+        DOCKER_CREDENTAILS_ID = 'docker-hub-credentails'
     }
 
     stages {
-        stage('Build'){
-            steps {
-                echo "Compliling ${APP_NAME}"
-                sh "chmod +x ./mvnw && ./mvnw clean compile"
-            }
-        }
 
-        //use parallel stage for synoc
-        stage('test and package'){
-            parallel{
-                stage('Test'){
-                    steps {
-                        echo 'Running unit test'
-                        sh './mvnw test'
-                        echo 'Unit tet passed'
-                    }
-                    // use 'post' to ensure the report is generate even if test is fail
-                    post {
-                        always {
-                            echo 'Capturing Test Result'
-                            junit 'target/surefire-reports/*.xml'
-                        }
-                    }
-                }
-                stage('Package'){
-                    steps {
-                        echo 'Package app into JAR'
-                        // We skip tests here because we already ran them in the 'Test' stage
-                        sh './mvnw package -DskipTests'
-                    }
-                }
-
-            }
-        }
-
-        //Input prompt stage
-        stage('Approval for Production'){
-            steps {
-                timeout(time: 30, unit:'MINUTES'){
-                    input(
-                        message: "Do you want to deploy ?",
-                        ok: 'Deploy now'
-                    )
-                }
-
-            }
-        }
-
-        stage('Deploy'){
-            steps {
-                echo 'Deploying to Prod'
-                sh 'sleep 3'
-                echo 'Completed'
-            }
-        }
-
-        stage('Archive'){
+        stage('Biuld and Test'){
             steps{
-                echo 'Archive the JAR file ...'
-                archiveArtifacts artifacts: 'target/*.jar',
-                allowEmptyArchive: false
+                echo "Compiling and Testing"
+                sh 'chomd +x mvnw && ./mvnw clean test'
+            }
+            post{
+                always {
+                    junit 'target/surefire-repost/*.xml'
+                }
             }
         }
-    }
 
-    // define post-build action
-    post{
-        always {
-            echo "pipeline exec completed for ${APP_NAME}"
+        stage('Dcoker Build'){
+            steps{
+                echo "Docker build image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} .'
+                sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
+            }
         }
-        success {
-            echo "success: buid and test is perfect"
+
+        stage('Docker push'){
+            step{
+                echo "Push to docker hub"
+                //withDockerRegistry securely logs in and out
+                withDockerRegistry([credentailId: DOCKER_CREDENTAIL_ID, url: '']){
+                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
+                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                }
+            }
         }
-        failure {
-            echo "failure: please check the log"
+        post{
+            always {
+                echo "Pipeline finished"
+            }
         }
     }
 }
