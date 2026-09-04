@@ -12,7 +12,7 @@ pipeline {
             steps {
                 echo "Compiling and Testing..."
                 // Single quotes are fine here because there are no variables
-                sh 'chmod +x mvnw && ./mvnw clean test'
+                sh 'chmod +x mvnw && ./mvnw clean package'
             }
             post {
                 always {
