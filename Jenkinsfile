@@ -1,50 +1,51 @@
 pipeline {
+    agent any
 
-    agent any // allow any avaiable agent
-
-    // define env variables
     environment {
+        // REPLACE 'YOUR_DOCKERHUB_USERNAME' with your actual Docker Hub username!
         DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
     }
 
     stages {
-
-        stage('Biuld and Test'){
-            steps{
-                echo "Compiling and Testing"
-                sh 'chmod +x mvnw && ./mvnw clean package'
-                sh 'find target -type f'
+        stage('Build & Test') {
+            steps {
+                echo "Compiling and Testing..."
+                sh 'chmod +x mvnw && ./mvnw clean test'
             }
-            post{
+            post {
                 always {
                     junit 'target/surefire-reports/*.xml'
                 }
             }
         }
 
-        stage('Dcoker Build'){
-            steps{
-                echo "Docker build image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
-                sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
+        stage('Docker Build') {
+            steps {
+                echo "Building Docker Image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} .'
+                // Also tag it as 'latest' for convenience
+                sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
             }
         }
 
-        stage('Docker push'){
-            steps{
-                echo "Push to docker hub"
-                //withDockerRegistry securely logs in and out
-                withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']){
-                    sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                    sh "docker push ${DOCKER_IMAGE}:latest"
+        stage('Docker Push') {
+            steps {
+                echo "Pushing to Docker Hub..."
+                // withDockerRegistry securely logs in and out
+                withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
+                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
+                    sh 'docker push ${DOCKER_IMAGE}:latest'
                 }
             }
         }
     }
-    post{
+
+    post {
         always {
-            echo "Pipeline finished"
+            echo "Pipeline finished."
+            // Optional: clean up local docker images to save disk space
+            // sh 'docker rmi ${DOCKER_IMAGE}:${env.BUILD_NUMBER} || true'
         }
     }
 }
