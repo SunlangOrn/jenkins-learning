@@ -1,0 +1,10 @@
+services:
+  jenkins-demo-app:
+    # We use 'latest' here, but in production, you would use ${BUILD_NUMBER}
+    image: ornsunlang/jenkins-demo:latest
+    container_name: jenkins-demo-app
+    ports:
+      - "8888:8080"
+    environment:
+      - SPRING_PROFILES_ACTIVE=prod
+    restart: always

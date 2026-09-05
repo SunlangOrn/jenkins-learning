@@ -38,6 +38,24 @@ pipeline {
                 }
             }
         }
+
+        stage('Deploy to Server') {
+            steps {
+                echo 'Starting Deployment...'
+                // In a real scenario, we would use: sshagent(['ssh-credential-id']) { sh 'ssh user@server "bash deploy.sh"' }
+                // For local learning, we execute the deployment script directly in the workspace:
+                withCredentials([string(credentialsId: 'deploy-script', variable: 'DEPLOY_CMD')]) {
+                    sh """
+                        echo "Executing deployment commands..."
+
+                        docker-compose -f docker-compose.yml down || true
+                        docker-compose -f docker-compose.yml up -d
+
+                        echo "Application deployed successfully!"
+                    """
+                }
+            }
+        }
     }
 
     post {
