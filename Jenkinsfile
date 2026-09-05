@@ -48,8 +48,8 @@ pipeline {
                     sh """
                         echo "Executing deployment commands..."
 
-                        docker-compose -f docker-compose.yml down || true
-                        docker-compose -f docker-compose.yml up -d
+                        docker compose -f docker-compose.yml down || true
+                        docker compose -f docker-compose.yml up -d
 
                         echo "Application deployed successfully!"
                     """
