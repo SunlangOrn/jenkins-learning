@@ -6,8 +6,8 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 public class HelloController {
 
-    @GetMapping("/helo")
-    public String sayHello(){
-        return  "Hello Automated With Jenkins CI/CD!";
+    @GetMapping("/hello")
+    public String sayHello() {
+        throw new RuntimeException("Simulated production failure!");
     }
 }
