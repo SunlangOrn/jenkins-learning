@@ -8,6 +8,11 @@ public class HelloController {
 
     @GetMapping("/hello")
     public String sayHello() {
-        throw new RuntimeException("Simulated production failure!");
+        return "Hello Automated With Jenkins CI/CD!";
+    }
+
+    @GetMapping("/health")
+    public String health() {
+        throw new RuntimeException("Simulated runtime failure!");
     }
 }
