@@ -69,7 +69,7 @@ pipeline {
 
                     // Curl the endpoint. -f makes curl fail on HTTP errors (4xx, 5xx)
                     // --retry 3 gives it 3 attempts in case it's slow to start
-                    sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/hello'
+                    sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/health'
 
                     echo "Health check passed!."
                 }
