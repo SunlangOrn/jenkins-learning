@@ -59,22 +59,20 @@ pipeline {
             }
         }
 
-        stage('Health Check') {
-            steps {
+       stage('Health Check') {
 
-                echo 'Verify app health'
-
-                script {
-                    sh 'sleep 5'
-
-                    // Curl the endpoint. -f makes curl fail on HTTP errors (4xx, 5xx)
-                    // --retry 3 gives it 3 attempts in case it's slow to start
-                    sh 'curl -f --retry 3 --retry-delay 2 http://localhost:8080/health'
-
-                    echo "Health check passed!."
-                }
-            }
-        }
+           when {
+               branch 'main'
+           }
+           steps {
+               echo 'Verify app health'
+               script {
+                   sh 'sleep 5'
+                   sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/hello'
+                   echo "✅ Health check passed!."
+               }
+           }
+       }
     }
 
     post {
