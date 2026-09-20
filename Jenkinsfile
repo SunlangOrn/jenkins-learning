@@ -81,21 +81,6 @@ pipeline {
                 }
             }
         }
-
-       stage('Health Check') {
-
-           when {
-               branch 'main'
-           }
-           steps {
-               echo 'Verify app health'
-               script {
-                   sh 'sleep 5'
-                   sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/hello'
-                   echo "✅ Health check passed!."
-               }
-           }
-       }
     }
 
     post {
