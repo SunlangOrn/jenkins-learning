@@ -1,6 +1,20 @@
 pipeline {
     agent any
 
+
+    parameters {
+        choice(
+            name: 'ENVIRONMENT' ,
+            choices: ['dev', 'staging', 'prod'] ,
+            description: 'which env should this be deploy to?'
+        )
+        string(
+            name: 'CUSTOM_MESSAGE' ,
+            defaultValue: 'deploying new version',
+            description: 'a message to print during deploy'
+        )
+    }
+
     environment {
         // REPLACE with your actual Docker Hub username if different
         DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
@@ -35,26 +49,35 @@ pipeline {
                 withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
                     retry(3) {
                         sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                        sh "docker push ${DOCKER_IMAGE}:latest"
                     }
                 }
             }
         }
 
         stage('Deploy to Server') {
+            when {
+                branch 'main'
+            }
             steps {
-                echo 'Starting Deployment...'
-                // In a real scenario, we would use: sshagent(['ssh-credential-id']) { sh 'ssh user@server "bash deploy.sh"' }
-                // For local learning, we execute the deployment script directly in the workspace:
-                withCredentials([string(credentialsId: 'deploy-script', variable: 'DEPLOY_CMD')]) {
-                    sh """
-                        echo "Executing deployment commands..."
+                echo "Starting deploy"
+                script {
+                    try {
+                        echo "target env: ${params.ENVIRONMENT}"
+                        echo "message: ${params.CUSTOM_MESSAGE}"
 
-                        docker-compose down || true
-                        docker-compose up -d
+                        if (params.ENVIRONMENT == 'prod'){
+                            echo "WARNING: deploying to production"
+                            // in real: sh 'docker-compose -f docker-compose.prod.yml up -d'
+                        } else {
+                            echo "deploy to ${params.ENVIRONMENT} env"
+                            //in real:sh 'docker-compose -f docker-compose.dev.yml up -d'
+                        }
 
-                        echo "Application deployed successfully!"
-                    """
+                        sh 'echo "Deployment commands executed successfully!"'
+                    } catch (Exception e) {
+                        echo "Deployment failed! Error: ${e.getMessage()}"
+                        throw e
+                    }
                 }
             }
         }
