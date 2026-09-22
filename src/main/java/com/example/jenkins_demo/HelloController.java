@@ -10,9 +10,4 @@ public class HelloController {
     public String sayHello() {
         return "Hello Automated With Jenkins CI/CD!";
     }
-
-    @GetMapping("/health")
-    public String health() {
-        throw new RuntimeException("Simulated runtime failure!");
-    }
 }

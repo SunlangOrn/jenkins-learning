@@ -5,13 +5,8 @@ pipeline {
     parameters {
         choice(
             name: 'ENVIRONMENT' ,
-            choices: ['dev', 'staging', 'prod'] ,
-            description: 'which env should this be deploy to?'
-        )
-        string(
-            name: 'CUSTOM_MESSAGE' ,
-            defaultValue: 'deploying new version',
-            description: 'a message to print during deploy'
+            choices: ['dev', 'prod'] ,
+            description: 'target deployment enviroment'
         )
     }
 
@@ -19,39 +14,47 @@ pipeline {
         // REPLACE with your actual Docker Hub username if different
         DOCKER_IMAGE = 'ornsunlang/jenkins-demo'
         DOCKER_CREDENTIALS_ID = 'docker-hub-credentials'
+        SONARQUBE_ENV = "SonarQube"
     }
 
     stages {
-        stage('Compile') {
+        satge('checkout') {
+            steps{
+                echo "checking out code from ${env.BRANCH_NAME}"
+            }
+        }
+        stage('Build and Test') {
             steps {
                 echo "Compiling application..."
                 sh 'chmod +x mvnw && ./mvnw clean compile'
             }
-        }
-
-        stage('Quality and Verification') {
-            parallel {
-                stage('Unit Tests') {
-                    steps {
-                        echo 'Running Testing'
-                        sh './mvnw test'
-                    }
-                    post {
-                        always { junit 'target/surefire-reports/*.xml'}
-                    }
-                }
-                stage ('Code Analysis') {
-                    steps {
-                        echo 'Running Code Analysis'
-                        sh 'slepp 3'
-                        echo 'SonarQube Analyisi Passed'
-                    }
-                }
-
+            post{
+                always { junit 'target/surefire-reports/*.xml' }
             }
         }
 
-        stage('Docker Build') {
+        stage('SonarQube Analysis') {
+            steps {
+                echo 'Running SonaQube Analysis'
+                withSonarQubeEnv(SONARQUBE_ENV) {
+                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo'
+                }
+            }
+        }
+
+        stage('Quality Gate') {
+            steps{
+                echo 'Check SonarQube Quality Gate'
+                timeout(time: 1, unit: 'MINUTES') {
+                    waitForQualityGate abortPipeline: true
+                }
+            }
+        }
+
+        stage('Docker Build and Push') {
+            when {
+                branch 'main'
+            }
             steps {
                 echo "Building Docker Image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
                 sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
@@ -72,22 +75,38 @@ pipeline {
                 echo "Starting deploy"
                 script {
                     try {
-                        echo "target env: ${params.ENVIRONMENT}"
-                        echo "message: ${params.CUSTOM_MESSAGE}"
+                        sh """
+                            export IMAGE_TAG=${env.BRANCH_NUMBER}
 
-                        if (params.ENVIRONMENT == 'prod'){
-                            echo "WARNING: deploying to production"
-                            // in real: sh 'docker-compose -f docker-compose.prod.yml up -d'
-                        } else {
-                            echo "deploy to ${params.ENVIRONMENT} env"
-                            //in real:sh 'docker-compose -f docker-compose.dev.yml up -d'
-                        }
-
-                        sh 'echo "Deployment commands executed successfully!"'
+                            if command -v docker compose >/del/null 2>&1; then
+                                docker compose -f docker-compose.yml down || true
+                                docker compose -f docker-compose.yml up -d
+                            elif docker compose version >/dev/null 2>&1; then
+                                docker compose -f docker-compose.yml down || true
+                                docker compose -f docker-compose.yml up -d
+                            else
+                                exit 1
+                            fi
+                        """
                     } catch (Exception e) {
-                        echo "Deployment failed! Error: ${e.getMessage()}"
+                        echo "Message: Deployment failed"
+                        echo "Error : ${e.getMessage()}"
                         throw e
                     }
+                }
+            }
+        }
+
+        stage('Health Check') {
+            when {
+                branch 'main'
+            }
+            steps {
+                echo 'Verifying app health'
+                script {
+                    sh 'sleep 10'
+                    sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/hello'
+                    echo "Health check passed!"
                 }
             }
         }
