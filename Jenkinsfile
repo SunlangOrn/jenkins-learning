@@ -18,7 +18,7 @@ pipeline {
     }
 
     stages {
-        satge('checkout') {
+        stage('checkout') {
             steps{
                 echo "checking out code from ${env.BRANCH_NAME}"
             }
