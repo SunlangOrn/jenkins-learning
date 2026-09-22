@@ -22,16 +22,32 @@ pipeline {
     }
 
     stages {
-        stage('Build & Test') {
+        stage('Compile') {
             steps {
-                echo "Compiling and Testing..."
-                // Single quotes are fine here because there are no variables
-                sh 'chmod +x mvnw && ./mvnw clean package'
+                echo "Compiling application..."
+                sh 'chmod +x mvnw && ./mvnw clean compile'
             }
-            post {
-                always {
-                    junit 'target/surefire-reports/*.xml'
+        }
+
+        stage('Quality and Verification') {
+            parallel {
+                stage('Unit Tests') {
+                    steps {
+                        echo 'Running Testing'
+                        sh './mvnw test'
+                    }
+                    post {
+                        always { junit 'target/surefire-reposts/*.xml'}
+                    }
                 }
+                stage ('Code Analysis') {
+                    steps {
+                        echo 'Running Code Analysis'
+                        sh 'slepp 3'
+                        echo 'SonarQube Analyisi Passed'
+                    }
+                }
+
             }
         }
 
@@ -40,16 +56,10 @@ pipeline {
                 echo "Building Docker Image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
                 sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
                 sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
-            }
-        }
 
-        stage('Docker Push') {
-            steps {
-                echo "Pushing to Docker Hub..."
                 withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
-                    retry(3) {
-                        sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                    }
+                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
+                    sh 'occker push ${DOCKER_IMAGE}:latest'
                 }
             }
         }
@@ -85,7 +95,14 @@ pipeline {
 
     post {
         always {
-            echo "Pipeline finished."
+            echo "Pipeline finished. Cleaning up workspace to save disk space..."
+            cleanWs() // cleanWs() delete the workspace folder for this specific job
+
+            //Optional: Clean docker image
+            //sh 'docker image prune -f || true'
+        }
+        failure {
+            echo "Pipeline failed"
         }
     }
 }
