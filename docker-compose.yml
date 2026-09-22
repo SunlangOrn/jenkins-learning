@@ -36,7 +36,7 @@ services:
       - "8888:8080"
       - "50000:50000"
     volumes:
-      - jenkins_home:/var/jenkins_home
+      - old_jenkins_home:/var/jenkins_home
       - /var/run/docker.sock:/var/run/docker.sock
     environment:
       - JENKINS_OPTS=--httpPort=8080
@@ -56,6 +56,8 @@ services:
 
 volumes:
   postgres_data:
-  jenkins_home:
+  old_jenkins_home:
+    external: true
+    name: jenkins_home
   sonarqube_data:
   sonarqube_extensions:

@@ -26,7 +26,7 @@ pipeline {
         stage('Build and Test') {
             steps {
                 echo "Compiling application..."
-                sh 'chmod +x mvnw && ./mvnw clean test'
+                sh 'chmod +x mvnw && ./mvnw clean package'
             }
             post{
                 always { junit 'target/surefire-reports/*.xml' }
