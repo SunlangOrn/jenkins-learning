@@ -79,11 +79,11 @@ pipeline {
                             export IMAGE_TAG=${env.BUILD_NUMBER}
 
                             if command -v docker compose >/dev/null 2>&1; then
-                                docker compose -f docker-compose.yml down || true
-                                docker compose -f docker-compose.yml up -d
-                            elif docker compose version >/dev/null 2>&1; then
-                                docker compose -f docker-compose.yml down || true
-                                docker compose -f docker-compose.yml up -d
+                                docker-compose -f docker-compose.yml down || true
+                                docker-compose -f docker-compose.yml up -d
+                            elif docker-compose version >/dev/null 2>&1; then
+                                docker-compose -f docker-compose.yml down || true
+                                docker-compose -f docker-compose.yml up -d
                             else
                                 exit 1
                             fi
