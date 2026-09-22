@@ -37,7 +37,7 @@ pipeline {
             steps {
                 echo 'Running SonaQube Analysis'
                 withSonarQubeEnv(SONARQUBE_ENV) {
-                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo'
+                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo -Dsonar.host.url=http://sonarqube:9000'
                 }
             }
         }
@@ -77,7 +77,7 @@ pipeline {
                     try {
                         sh """
                             export IMAGE_TAG=${env.BUILD_NUMBER}
-                            docker compose -p jenkins-demo -f docker-compose.yml down || true
+                            docker compose -p jenkins-demo -f docker-compose.yml down
                             docker compose -p jenkins-demo -f docker-compose.yml up -d
                         """
                     } catch (Exception e) {
