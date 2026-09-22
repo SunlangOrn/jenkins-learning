@@ -37,7 +37,7 @@ pipeline {
             steps {
                 echo 'Running SonaQube Analysis'
                 withSonarQubeEnv(SONARQUBE_ENV) {
-                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo -Dsonar.verbose=true'
+                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo'
                 }
             }
         }
@@ -62,7 +62,7 @@ pipeline {
 
                 withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
                     sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
-                    sh 'occker push ${DOCKER_IMAGE}:latest'
+                    sh 'docker push ${DOCKER_IMAGE}:latest'
                 }
             }
         }
@@ -76,7 +76,7 @@ pipeline {
                 script {
                     try {
                         sh """
-                            export IMAGE_TAG=${env.BRANCH_NUMBER}
+                            export IMAGE_TAG=${env.BUILD_NUMBER}
 
                             if command -v docker compose >/dev/null 2>&1; then
                                 docker compose -f docker-compose.yml down || true
