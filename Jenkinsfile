@@ -26,7 +26,7 @@ pipeline {
         stage('Build and Test') {
             steps {
                 echo "Compiling application..."
-                sh 'chmod +x mvnw && ./mvnw clean compile'
+                sh 'chmod +x mvnw && ./mvnw clean test'
             }
             post{
                 always { junit 'target/surefire-reports/*.xml' }
@@ -78,7 +78,7 @@ pipeline {
                         sh """
                             export IMAGE_TAG=${env.BRANCH_NUMBER}
 
-                            if command -v docker compose >/del/null 2>&1; then
+                            if command -v docker compose >/dev/null 2>&1; then
                                 docker compose -f docker-compose.yml down || true
                                 docker compose -f docker-compose.yml up -d
                             elif docker compose version >/dev/null 2>&1; then
