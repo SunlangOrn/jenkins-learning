@@ -37,7 +37,7 @@ pipeline {
             steps {
                 echo 'Running SonaQube Analysis'
                 withSonarQubeEnv(SONARQUBE_ENV) {
-                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo'
+                    sh './mvnw sonar:sonar -Dsonar.projectKey=jenkins-demo -Dsonar.projectName=jenkins-demo -Dsonar.verbose=true'
                 }
             }
         }
