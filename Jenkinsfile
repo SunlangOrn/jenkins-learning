@@ -57,12 +57,12 @@ pipeline {
             }
             steps {
                 echo "Building Docker Image: ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
-                sh 'docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} .'
-                sh 'docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest'
+                sh "docker build -t ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ."
+                sh "docker tag ${DOCKER_IMAGE}:${env.BUILD_NUMBER} ${DOCKER_IMAGE}:latest"
 
                 withDockerRegistry([credentialsId: DOCKER_CREDENTIALS_ID, url: '']) {
-                    sh 'docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}'
-                    sh 'docker push ${DOCKER_IMAGE}:latest'
+                    sh "docker push ${DOCKER_IMAGE}:${env.BUILD_NUMBER}"
+                    sh "docker push ${DOCKER_IMAGE}:latest"
                 }
             }
         }
