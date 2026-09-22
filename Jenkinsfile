@@ -37,7 +37,7 @@ pipeline {
                         sh './mvnw test'
                     }
                     post {
-                        always { junit 'target/surefire-reposts/*.xml'}
+                        always { junit 'target/surefire-reports/*.xml'}
                     }
                 }
                 stage ('Code Analysis') {
