@@ -77,8 +77,8 @@ pipeline {
                     try {
                         sh """
                             export IMAGE_TAG=${env.BUILD_NUMBER}
-                            /usr/local/bin/docker-compose -f docker-compose.yml down || true
-                            /usr/local/bin/docker-compose -f docker-compose.yml up -d
+                            docker compose -f docker-compose.yml down || true
+                            docker compose -f docker-compose.yml up -d
                         """
                     } catch (Exception e) {
                         echo "Message: Deployment failed"
