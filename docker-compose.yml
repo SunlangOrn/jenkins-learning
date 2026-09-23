@@ -33,43 +33,10 @@ services:
     networks:
       - jenkins-net
 
-  jenkins:
-    image: jenkins/jenkins:lts
-    container_name: jenkins-server
-    ports:
-      - "8888:8080"
-      - "50000:50000"
-    volumes:
-      - old_jenkins_home:/var/jenkins_home
-      - /var/run/docker.sock:/var/run/docker.sock
-    environment:
-      - JENKINS_OPTS=--httpPort=8080
-    restart: always
-    networks:
-      - jenkins-net
-
-  sonarqube:
-    image: sonarqube:lts-community
-    container_name: sonarqube-server
-    ports:
-      - "9000:9000"
-    environment:
-      - SONAR_FORCEAUTHENTICATION=false
-    volumes:
-      - sonarqube_data:/opt/sonarqube/data
-      - sonarqube_extensions:/opt/sonarqube/extensions
-    restart: always
-    networks:
-      - jenkins-net
-
 volumes:
   postgres_data:
-  old_jenkins_home:
-    external: true
-    name: jenkins_home
-  sonarqube_data:
-  sonarqube_extensions:
 
 networks:
   jenkins-net:
     name: jenkins-net
+    external: true
