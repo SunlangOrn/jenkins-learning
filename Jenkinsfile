@@ -98,7 +98,7 @@ pipeline {
                 echo 'Verifying app health'
                 script {
                     sh 'sleep 10'
-                    sh 'curl -f --retry 3 --retry-delay 2 http://localhost:1200/hello'
+                    sh 'curl -f --retry 3 --retry-delay 2 http://jenkins-app:1200/hello'
                     echo "Health check passed!"
                 }
             }
