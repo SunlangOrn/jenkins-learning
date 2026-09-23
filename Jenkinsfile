@@ -77,7 +77,8 @@ pipeline {
                     try {
                         sh """
                             export IMAGE_TAG=${env.BUILD_NUMBER}
-                            docker compose -p jenkins-demo -f docker-compose.yml down
+                            docker compose -p jenkins-demo -f docker-compose.yml down --remove-orphans || true
+                            docker rm -f jenkins_db jenkins-app || true
                             docker compose -p jenkins-demo -f docker-compose.yml up -d
                         """
                     } catch (Exception e) {
